@@ -70,38 +70,38 @@ describe ActiveSupport::Cache::Level2 do
   describe 'storage' do
     it 'writes to all stores' do
       subject.write('foo', 'bar')
-      expect(level1.read('foo')).to eq('bar')
-      expect(level2.read('foo')).to eq('bar')
+      expect(level1.read('SomeName/foo')).to eq('bar')
+      expect(level2.read('SomeName/foo')).to eq('bar')
     end
 
     it 'reads from the top store' do
-      level1.write('foo', 'bar1')
-      level2.write('foo', 'bar2')
+      level1.write('SomeName/foo', 'bar1')
+      level2.write('SomeName/foo', 'bar2')
       expect(subject.read('foo')).to eq('bar1')
     end
 
     it 'can read from the bottom store' do
-      level2.write('foo', 'bar2')
+      level2.write('SomeName/foo', 'bar2')
       expect(subject.read('foo')).to eq('bar2')
     end
 
     it 'populates the top store on reads' do
-      level2.write('foo', 'bar2')
+      level2.write('SomeName/foo', 'bar2')
       subject.read('foo')
-      expect(level1.read('foo')).to eq('bar2')
+      expect(level1.read('SomeName/foo')).to eq('bar2')
     end
   end
 
   describe ':only restrictions' do
     it 'only writes to the selected store' do
       subject.write('foo', 'bar', only: :L2)
-      expect(level1.read('foo')).to be_nil
-      expect(level2.read('foo')).to eq('bar')
+      expect(level1.read('SomeName/foo')).to be_nil
+      expect(level2.read('SomeName/foo')).to eq('bar')
     end
 
     it 'only reads the selected store' do
-      level1.write('foo', 'bar1', only: :L2)
-      level2.write('foo', 'bar2', only: :L2)
+      level1.write('SomeName/foo', 'bar1', only: :L2)
+      level2.write('SomeName/foo', 'bar2', only: :L2)
       expect(subject.read('foo', only: :L1)).to eq('bar1')
       expect(subject.read('foo', only: :L2)).to eq('bar2')
     end
@@ -130,7 +130,7 @@ describe ActiveSupport::Cache::Level2 do
     context 'on miss on only top levels' do
       it 'notifies' do
         expect {
-          level2.write('foo', 123)
+          level2.write('SomeName/foo', 123)
           subject.read('foo')
         }.to change {
           events['miss'].map(&:payload)
@@ -193,20 +193,6 @@ describe ActiveSupport::Cache::Level2 do
           a_hash_including(store_name: 'SomeName', cache_name: :L2)
         ))
       end
-    end
-  end
-
-
-  describe '#read_multi' do
-    before do
-      subject.write('a', 'a1', only: :L1)
-      subject.write('a', 'a2', only: :L2)
-      subject.write('b', 'b1', only: :L1)
-      subject.write('c', 'c2', only: :L2)
-    end
-
-    it 'mass-reads data from each store' do
-      expect(subject.read_multi('a', 'b', 'c', 'd')).to eq('a' => 'a1', 'b' => 'b1', 'c' => 'c2')
     end
   end
 end

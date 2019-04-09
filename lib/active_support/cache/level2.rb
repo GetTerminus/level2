@@ -27,16 +27,6 @@ module ActiveSupport
         @stores.each_value { |s| s.clear(*args) }
       end
 
-      def read_multi(*names)
-        result = {}
-        @stores.each do |_name,store|
-          data = store.read_multi(*names)
-          result.merge! data
-          names -= data.keys
-        end
-        result
-      end
-
       protected
 
       def namespace_key(key, options = nil)
