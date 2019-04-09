@@ -37,8 +37,11 @@ module ActiveSupport
         result
       end
 
-
       protected
+
+      def namespace_key(key, options = nil)
+        @store_name + super
+      end
 
       def read_entry(key, options)
         stores = selected_stores(options)
