@@ -16,7 +16,13 @@ module ActiveSupport
         @stores = store_options.each_with_object({}) do |(name,options), h|
           h[name] = ActiveSupport::Cache.lookup_store(options)
         end
-        @options = {}
+        provided_namespace = store_options[:namespace]
+        store_options[:namespace] = proc do
+          provided = provided_namespace.is_a?(Proc) ? provided_namespace.call : ''
+          @store_name + ':' + provided
+        end
+
+        super(store_options)
       end
 
       def cleanup(*args)
@@ -28,10 +34,6 @@ module ActiveSupport
       end
 
       protected
-
-      def namespace_key(key, options = nil)
-        @store_name + '/' + super
-      end
 
       def read_entry(key, options)
         stores = selected_stores(options)
