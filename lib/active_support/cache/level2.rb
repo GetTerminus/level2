@@ -40,7 +40,7 @@ module ActiveSupport
       protected
 
       def namespace_key(key, options = nil)
-        @store_name + super
+        @store_name + '/' + super
       end
 
       def read_entry(key, options)

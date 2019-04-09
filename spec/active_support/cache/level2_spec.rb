@@ -28,6 +28,12 @@ describe ActiveSupport::Cache::Level2 do
       expect(subject.write('foo', 'bar')).to be_truthy
     end
 
+    it 'prefixes values' do
+      subject.write('foo', 'bar')
+
+      expect(level1.read('SomeName/foo')).to eq 'bar'
+    end
+
     it 'can #read' do
       subject.write('foo', 'bar')
       expect(subject.read('foo')).to eq('bar')
